@@ -196,60 +196,64 @@
     localStorage.removeItem(LS_KEY);
     renderAdminList();
     updateCount();
-    showMessage(el("adminMsg"),"All entries deleted");
   }
 
-  // Update footer count
   function updateCount(){
-    let list=loadEntries();
-    el("memberCount").innerText=list.length;
+    el("memberCount").textContent=loadEntries().length;
   }
-  updateCount();
 
-  // Gallery Management
-  function loadGallery(){return JSON.parse(localStorage.getItem(GALLERY_KEY)||"[]");}
-  function saveGallery(arr){localStorage.setItem(GALLERY_KEY,JSON.stringify(arr));}
+  // Gallery (GitHub)
+  const GITHUB_IMAGES = [
+    "https://raw.githubusercontent.com/yourusername/yourrepo/main/images/photo1.jpg", 
+    "https://raw.githubusercontent.com/yourusername/yourrepo/main/images/photo2.jpg", 
+    "https://raw.githubusercontent.com/yourusername/yourrepo/main/images/photo3.jpg"
+  ];
+  function renderGallery(){
+    const galleryContainer=el("galleryView");
+    if(GITHUB_IMAGES.length===0){
+      galleryContainer.innerHTML="<p class='muted'>No photos available</p>";
+      return;
+    }
+    galleryContainer.innerHTML=GITHUB_IMAGES.map(src=>`
+      <div class="gallery-item">
+        <img src="${src}" alt="Gallery Image" />
+      </div>
+    `).join("");
+  }
+
+  // Admin Gallery Management
+  function renderAdminGallery(){
+    const adminGallery=el("adminGallery");
+    adminGallery.innerHTML=GITHUB_IMAGES.map(src=>`
+      <div class="gallery-item">
+        <img src="${src}" alt="Gallery Image" />
+        <button onclick="removePhoto('${src}')">Remove</button>
+      </div>
+    `).join("");
+  }
 
   function addPhoto(){
-    const file=el("photoInput").files[0];
-    if(!file){alert("Please select a photo");return;}
+    const fileInput=el("photoInput");
+    const file=fileInput.files[0];
+    if(!file){alert("Please select an image to upload");return;}
+
     const reader=new FileReader();
-    reader.onload=function(e){
-      let photos=loadGallery();
-      photos.unshift({id:Date.now(),src:e.target.result});
-      saveGallery(photos);
+    reader.onloadend=function(){
+      const newPhotoURL=reader.result;
+      GITHUB_IMAGES.push(newPhotoURL); // Store in memory (should use a backend for real apps)
       renderAdminGallery();
-      renderGallery();
-    }
+    };
     reader.readAsDataURL(file);
   }
 
-  function renderAdminGallery(){
-    const photos=loadGallery();
-    if(photos.length===0){el("adminGallery").innerHTML="<p class='muted'>No photos yet</p>";return;}
-    el("adminGallery").innerHTML=`<div class="gallery-grid">`+
-      photos.map(p=>`
-        <div class="gallery-item">
-          <img src="${p.src}">
-          <button onclick="deletePhoto(${p.id})">X</button>
-        </div>
-      `).join("")+`</div>`;
-  }
-  function deletePhoto(id){
-    if(!confirm("Delete this photo?")) return;
-    let photos=loadGallery().filter(p=>p.id!==id);
-    saveGallery(photos);
-    renderAdminGallery();
-    renderGallery();
-  }
-
-  function renderGallery(){
-    const photos=loadGallery();
-    if(photos.length===0){el("galleryView").innerHTML="<p class='muted'>No photos available</p>";return;}
-    el("galleryView").innerHTML=photos.map(p=>`<img src="${p.src}">`).join("");
+  function removePhoto(photoURL){
+    const index=GITHUB_IMAGES.indexOf(photoURL);
+    if(index!==-1){
+      GITHUB_IMAGES.splice(index, 1);
+      renderAdminGallery();
+    }
   }
 </script>
+
 </body>
 </html>
-
-
