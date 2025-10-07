@@ -7,81 +7,116 @@
 <style>
   body{margin:0;font-family:Arial, sans-serif;background:#f8f9fa}
   .header{
-    background:url('cover.jpg') no-repeat center/cover;
+    background:url('https://i.ibb.co/2t9zP2B/kerala-banner.jpg') no-repeat center/cover;
     height:200px;display:flex;align-items:center;justify-content:center;
     color:#fff;font-size:28px;font-weight:bold;
     text-shadow:2px 2px 6px rgba(0,0,0,0.5);
   }
-  .container{display:flex;min-height:calc(100vh - 40px);}
+  .container{display:flex;min-height:calc(100vh - 240px);}
   .sidebar{
     width:200px;background:#004d40;color:#fff;padding:20px 0;flex-shrink:0;
   }
   .sidebar a{
     display:block;padding:12px 20px;color:#fff;text-decoration:none;
     border-bottom:1px solid rgba(255,255,255,0.2);
+    cursor:pointer;
   }
   .sidebar a:hover{background:#00695c;}
   .content{flex:1;padding:20px;}
   .footer{
     background:#222;color:#fff;text-align:center;padding:10px;
   }
-  input,textarea,button,select{margin:5px 0;padding:6px;width:100%;}
-  button{cursor:pointer;}
-  .entry{border:1px solid #ccc;padding:8px;margin:8px 0;background:#fff;border-radius:4px;}
-  .disabled{opacity:0.5;}
+  /* Forms & Messages */
+  input,textarea{width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;font-size:14px}
+  label{font-size:13px;margin:6px 0;display:block}
+  button{background:#0b6b3a;color:#fff;padding:8px 12px;border:0;border-radius:6px;cursor:pointer;font-size:14px}
+  button.ghost{background:#e9ecef;color:#111}
+  .controls{margin-top:12px;display:flex;gap:10px;flex-wrap:wrap}
+  .msg{padding:8px;border-radius:6px;margin:10px 0}
+  .msg.success{background:#e6ffed;border:1px solid #b2f2bb;color:#064e2b}
+  .msg.error{background:#ffe6e6;border:1px solid #f5b5b5;color:#6b0b0b}
+  .entry{background:#f9f9f9;padding:8px;border-radius:6px;margin-bottom:8px;border-left:4px solid #c2f0d1}
+  .entry button{font-size:12px;margin-top:4px}
+  .muted{color:#666;font-size:12px}
+  .hidden{display:none}
+  /* Gallery */
+  .gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+  .gallery-grid img{width:100%;border-radius:6px;box-shadow:0 2px 6px rgba(0,0,0,0.2)}
+  .gallery-item{position:relative}
+  .gallery-item button{position:absolute;top:4px;right:4px;background:red;font-size:12px;padding:2px 6px}
 </style>
 </head>
 <body>
 
-  <div class="header">
-    KERALA SAMAJAM CHENNAI
-  </div>
+  <div class="header">KERALA SAMAJAM CHENNAI</div>
 
   <div class="container">
     <div class="sidebar">
-      <a href="#" onclick="showSection('home')">Home</a>
-      <a href="#" onclick="showSection('login')">Login</a>
-      <a href="#" onclick="showSection('gallery')">Gallery</a>
+      <a onclick="showSection('memberSection')">Register</a>
+      <a onclick="showSection('adminLoginSection')">Login (Admin)</a>
+      <a onclick="showSection('newsSection')">News</a>
+      <a onclick="showSection('gallerySection')">Gallery</a>
     </div>
+
     <div class="content">
-      
-      <!-- Home -->
-      <section id="home">
-        <h2>Welcome to Kerala Samajam Chennai</h2>
-        <p>Please register below:</p>
-        <form id="regForm">
-          <input placeholder="Name" id="name" required />
-          <input placeholder="Phone" id="phone" required />
-          <input placeholder="Email" id="email" required />
-          <textarea placeholder="Address" id="address"></textarea>
-          <button type="submit">Register</button>
+      <!-- Member Registration -->
+      <section id="memberSection">
+        <h2>Member Registration</h2>
+        <div id="alertArea"></div>
+        <form id="regForm" onsubmit="return false;">
+          <label>Name *</label>
+          <input id="name" type="text" required>
+          <label>Phone *</label>
+          <input id="phone" type="tel" required>
+          <label>Address *</label>
+          <textarea id="address" required></textarea>
+          <label>Message</label>
+          <textarea id="message"></textarea>
+          <div class="controls">
+            <button type="button" id="btnSave">Register</button>
+            <button type="reset" class="ghost">Clear</button>
+          </div>
         </form>
       </section>
 
-      <!-- Login -->
-      <section id="login" class="hidden">
+      <!-- Admin Login -->
+      <section id="adminLoginSection" class="hidden">
         <h2>Admin Login</h2>
-        <input type="password" id="adminPass" placeholder="Enter Password" />
-        <button onclick="adminLogin()">Login</button>
+        <div id="loginMsg"></div>
+        <label>Password:</label>
+        <input id="adminPass" type="password">
+        <div class="controls">
+          <button onclick="checkAdmin()">Login</button>
+        </div>
       </section>
 
-      <!-- Admin -->
-      <section id="admin" class="hidden">
+      <!-- Admin Dashboard -->
+      <section id="adminSection" class="hidden">
         <h2>Admin Dashboard</h2>
-        <input type="text" id="searchBox" placeholder="Search by name or phone" oninput="renderAdminList()" />
-        <div id="memberList"></div>
-        <h3>Add Gallery Photo</h3>
-        <input type="file" accept="image/*" id="photoUpload" onchange="addPhoto(event)" />
-        <div id="gallery"></div>
-        <button onclick="logoutAdmin()">Logout</button>
+        <div id="adminMsg"></div>
+        <div id="savedList"></div>
+        <div class="controls">
+          <button class="ghost" onclick="clearAll()">Delete All Entries</button>
+          <button onclick="logoutAdmin()">Logout</button>
+        </div>
+        <hr>
+        <h3>Manage Gallery</h3>
+        <input type="file" id="photoInput" accept="image/*">
+        <button onclick="addPhoto()">Upload Photo</button>
+        <div id="adminGallery"></div>
+      </section>
+
+      <!-- News -->
+      <section id="newsSection" class="hidden">
+        <h2>News</h2>
+        <p>No news available right now.</p>
       </section>
 
       <!-- Gallery -->
-      <section id="gallery" class="hidden">
+      <section id="gallerySection" class="hidden">
         <h2>Gallery</h2>
-        <div id="publicGallery"></div>
+        <div id="galleryView" class="gallery-grid"></div>
       </section>
-
     </div>
   </div>
 
@@ -90,110 +125,129 @@
   </div>
 
 <script>
-const LS_MEMBERS="kerala_members";
-const LS_GALLERY="kerala_gallery";
-const ADMIN_PASSWORD="1234"; // change this
+  const LS_KEY="kerala_samajam_members";
+  const GALLERY_KEY="kerala_samajam_gallery";
+  const ADMIN_PASSWORD="samajam123"; // 🔑 change password
 
-function el(id){return document.getElementById(id);}
-function loadMembers(){return JSON.parse(localStorage.getItem(LS_MEMBERS)||"[]");}
-function saveMembers(list){localStorage.setItem(LS_MEMBERS,JSON.stringify(list));}
-function loadGallery(){return JSON.parse(localStorage.getItem(LS_GALLERY)||"[]");}
-function saveGallery(list){localStorage.setItem(LS_GALLERY,JSON.stringify(list));}
+  const el=id=>document.getElementById(id);
 
-function showSection(id){
-  document.querySelectorAll(".content section").forEach(s=>s.classList.add("hidden"));
-  el(id).classList.remove("hidden");
-}
-
-document.getElementById("regForm").onsubmit=function(e){
-  e.preventDefault();
-  let list=loadMembers();
-  list.push({
-    id:Date.now(),
-    name:el("name").value,
-    phone:el("phone").value,
-    email:el("email").value,
-    address:el("address").value,
-    subscribed:true,
-    active:true
-  });
-  saveMembers(list);
-  alert("Registered successfully!");
-  updateCount();
-  e.target.reset();
-}
-
-function updateCount(){
-  el("memberCount").innerText=loadMembers().length;
-}
-updateCount();
-
-// Admin Login
-function adminLogin(){
-  if(el("adminPass").value===ADMIN_PASSWORD){
-    showSection("admin");
-    renderAdminList();
-    renderGallery();
-  }else alert("Wrong password");
-}
-function logoutAdmin(){
-  showSection("home");
-}
-
-// Render Admin Members
-function renderAdminList(){
-  let q=el("searchBox").value.toLowerCase();
-  let list=loadMembers().filter(m=>m.name.toLowerCase().includes(q)||m.phone.includes(q));
-  if(list.length===0){el("memberList").innerHTML="<p>No members found</p>";return;}
-  el("memberList").innerHTML=list.map(m=>`
-    <div class="entry ${!m.active?'disabled':''}">
-      <strong>${m.name}</strong> (${m.phone})<br>
-      <small>${m.email}</small><br>
-      <small>${m.address}</small><br>
-      Subscribed: <input type="checkbox" ${m.subscribed?"checked":""} onclick="toggleSubscribe(${m.id})" />
-      Active: <input type="checkbox" ${m.active?"checked":""} onclick="toggleActive(${m.id})" />
-    </div>
-  `).join("");
-}
-
-function toggleSubscribe(id){
-  let list=loadMembers();
-  let m=list.find(x=>x.id===id);
-  m.subscribed=!m.subscribed;
-  saveMembers(list);
-  renderAdminList();
-}
-function toggleActive(id){
-  let list=loadMembers();
-  let m=list.find(x=>x.id===id);
-  m.active=!m.active;
-  saveMembers(list);
-  renderAdminList();
-}
-
-// Gallery
-function addPhoto(e){
-  let file=e.target.files[0];
-  if(!file) return;
-  let reader=new FileReader();
-  reader.onload=function(ev){
-    let list=loadGallery();
-    list.push(ev.target.result);
-    saveGallery(list);
-    renderGallery();
-    renderPublicGallery();
+  // Section switching
+  function showSection(sec){
+    document.querySelectorAll('.content section').forEach(s=>s.classList.add('hidden'));
+    el(sec).classList.remove('hidden');
+    if(sec==="adminSection"){renderAdminList();renderAdminGallery();}
+    if(sec==="gallerySection"){renderGallery();}
   }
-  reader.readAsDataURL(file);
-}
-function renderGallery(){
-  let list=loadGallery();
-  el("gallery").innerHTML=list.map(src=>`<img src="${src}" style="max-width:100px;margin:5px;border:1px solid #ccc"/>`).join("");
-}
-function renderPublicGallery(){
-  let list=loadGallery();
-  el("publicGallery").innerHTML=list.map(src=>`<img src="${src}" style="max-width:150px;margin:5px;border:1px solid #ccc"/>`).join("");
-}
-renderPublicGallery();
+
+  function showMessage(container,text,type="success"){
+    container.innerHTML=`<div class="msg ${type}">${text}</div>`;
+    setTimeout(()=>container.innerHTML="",3000);
+  }
+
+  // Member Data
+  function getData(){
+    return {id:Date.now(),name:el("name").value,phone:el("phone").value,address:el("address").value,message:el("message").value};
+  }
+  function loadEntries(){return JSON.parse(localStorage.getItem(LS_KEY)||"[]");}
+  function saveEntries(arr){localStorage.setItem(LS_KEY,JSON.stringify(arr));updateCount();}
+
+  // Save Member
+  el("btnSave").onclick=()=>{
+    const d=getData();
+    if(!d.name||!d.phone||!d.address){showMessage(el("alertArea"),"Fill all required fields","error");return;}
+    let list=loadEntries();list.unshift(d);saveEntries(list);
+    el("regForm").reset();
+    showMessage(el("alertArea"),"Registered successfully ✅");
+  };
+
+  // Admin login
+  function checkAdmin(){
+    const pass=el("adminPass").value;
+    if(pass===ADMIN_PASSWORD){
+      showSection('adminSection');
+    } else {
+      showMessage(el("loginMsg"),"Wrong password","error");
+    }
+  }
+  function logoutAdmin(){showSection('memberSection');}
+
+  // Admin Dashboard - Members
+  function renderAdminList(){
+    const list=loadEntries();
+    if(list.length===0){el("savedList").innerHTML="<p class='muted'>No members yet</p>";return;}
+    el("savedList").innerHTML=list.map(m=>`
+      <div class="entry">
+        <strong>${m.name}</strong> (${m.phone})<br>
+        <span class="muted">${m.address}</span><br>
+        <em>${m.message||""}</em><br>
+        <button onclick="deleteEntry(${m.id})">Delete</button>
+      </div>
+    `).join("");
+  }
+  function deleteEntry(id){
+    if(!confirm("Are you sure you want to delete this member?")) return;
+    let list=loadEntries().filter(m=>m.id!==id);
+    saveEntries(list);
+    renderAdminList();
+    showMessage(el("adminMsg"),"Entry deleted");
+  }
+  function clearAll(){
+    if(!confirm("Delete ALL members?")) return;
+    localStorage.removeItem(LS_KEY);
+    renderAdminList();
+    updateCount();
+    showMessage(el("adminMsg"),"All entries deleted");
+  }
+
+  // Update footer count
+  function updateCount(){
+    let list=loadEntries();
+    el("memberCount").innerText=list.length;
+  }
+  updateCount();
+
+  // Gallery Management
+  function loadGallery(){return JSON.parse(localStorage.getItem(GALLERY_KEY)||"[]");}
+  function saveGallery(arr){localStorage.setItem(GALLERY_KEY,JSON.stringify(arr));}
+
+  function addPhoto(){
+    const file=el("photoInput").files[0];
+    if(!file){alert("Please select a photo");return;}
+    const reader=new FileReader();
+    reader.onload=function(e){
+      let photos=loadGallery();
+      photos.unshift({id:Date.now(),src:e.target.result});
+      saveGallery(photos);
+      renderAdminGallery();
+      renderGallery();
+    }
+    reader.readAsDataURL(file);
+  }
+
+  function renderAdminGallery(){
+    const photos=loadGallery();
+    if(photos.length===0){el("adminGallery").innerHTML="<p class='muted'>No photos yet</p>";return;}
+    el("adminGallery").innerHTML=`<div class="gallery-grid">`+
+      photos.map(p=>`
+        <div class="gallery-item">
+          <img src="${p.src}">
+          <button onclick="deletePhoto(${p.id})">X</button>
+        </div>
+      `).join("")+`</div>`;
+  }
+  function deletePhoto(id){
+    if(!confirm("Delete this photo?")) return;
+    let photos=loadGallery().filter(p=>p.id!==id);
+    saveGallery(photos);
+    renderAdminGallery();
+    renderGallery();
+  }
+
+  function renderGallery(){
+    const photos=loadGallery();
+    if(photos.length===0){el("galleryView").innerHTML="<p class='muted'>No photos available</p>";return;}
+    el("galleryView").innerHTML=photos.map(p=>`<img src="${p.src}">`).join("");
+  }
 </script>
 </body>
 </html>
